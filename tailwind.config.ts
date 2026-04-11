@@ -14,7 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Manrope", "sans-serif"],
+        sans: ["DM Sans", "sans-serif"],
+        display: ["Playfair Display", "serif"],
         arabic: ["Cairo", "sans-serif"],
       },
       colors: {
