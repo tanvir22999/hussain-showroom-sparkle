@@ -1,12 +1,25 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Menu, X, Search, ShoppingBag } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Menu, X, Search, ShoppingBag, User, LogOut } from "lucide-react";
 
 const Header = () => {
   const { t, toggleLang, lang } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const navLinks = [
     { to: "/", label: t("nav_home") },
@@ -55,6 +68,26 @@ const Header = () => {
             <button className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" aria-label="Cart">
               <ShoppingBag size={18} />
             </button>
+            {user ? (
+              <button
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  navigate("/");
+                }}
+                className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Sign out"
+              >
+                <LogOut size={18} />
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Sign in"
+              >
+                <User size={18} />
+              </Link>
+            )}
           </div>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
