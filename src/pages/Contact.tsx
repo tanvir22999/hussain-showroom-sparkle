@@ -1,15 +1,34 @@
+import { useRef, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import emailjs from "@emailjs/browser";
+
+const SERVICE_ID = "service_caaaye9";
+const TEMPLATE_ID = "template_eihmeq7";
+const PUBLIC_KEY = "t8phjLsGQ7ohUVsBZ";
 
 const ContactPage = () => {
   const { t } = useLanguage();
+  const formRef = useRef<HTMLFormElement>(null);
+  const [sending, setSending] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Message sent successfully!");
+    if (!formRef.current) return;
+    setSending(true);
+    try {
+      await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, formRef.current, PUBLIC_KEY);
+      toast.success(t("contact_send_success"));
+      formRef.current.reset();
+    } catch (err) {
+      console.error("EmailJS error:", err);
+      toast.error(t("contact_send_error"));
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
