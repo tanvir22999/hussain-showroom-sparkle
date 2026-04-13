@@ -1,15 +1,34 @@
+import { useRef, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import emailjs from "@emailjs/browser";
+
+const SERVICE_ID = "service_caaaye9";
+const TEMPLATE_ID = "template_eihmeq7";
+const PUBLIC_KEY = "t8phjLsGQ7ohUVsBZ";
 
 const ContactPage = () => {
   const { t } = useLanguage();
+  const formRef = useRef<HTMLFormElement>(null);
+  const [sending, setSending] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Message sent successfully!");
+    if (!formRef.current) return;
+    setSending(true);
+    try {
+      await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, formRef.current, PUBLIC_KEY);
+      toast.success(t("contact_send_success"));
+      formRef.current.reset();
+    } catch (err) {
+      console.error("EmailJS error:", err);
+      toast.error(t("contact_send_error"));
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -31,25 +50,25 @@ const ContactPage = () => {
                 className="bg-card/94 p-7 rounded-2xl border border-border/30 shadow-card"
               >
                 <h2 className="font-bold text-xl mb-5">{t("contact_form_title")}</h2>
-                <form onSubmit={handleSubmit} className="grid gap-4">
+                <form ref={formRef} onSubmit={handleSubmit} className="grid gap-4">
                   <div>
                     <label className="text-sm font-semibold block mb-1">{t("contact_name")}</label>
-                    <input type="text" required placeholder={t("contact_name_ph")} className="w-full px-3 py-2.5 rounded-lg border border-border/30 bg-card text-sm" />
+                    <input type="text" name="from_name" required placeholder={t("contact_name_ph")} className="w-full px-3 py-2.5 rounded-lg border border-border/30 bg-card text-sm" />
                   </div>
                   <div>
                     <label className="text-sm font-semibold block mb-1">{t("contact_mobile")}</label>
-                    <input type="tel" placeholder={t("contact_mobile_ph")} className="w-full px-3 py-2.5 rounded-lg border border-border/30 bg-card text-sm" />
+                    <input type="tel" name="phone" placeholder={t("contact_mobile_ph")} className="w-full px-3 py-2.5 rounded-lg border border-border/30 bg-card text-sm" />
                   </div>
                   <div>
                     <label className="text-sm font-semibold block mb-1">{t("contact_email")}</label>
-                    <input type="email" placeholder={t("contact_email_ph")} className="w-full px-3 py-2.5 rounded-lg border border-border/30 bg-card text-sm" />
+                    <input type="email" name="reply_to" placeholder={t("contact_email_ph")} className="w-full px-3 py-2.5 rounded-lg border border-border/30 bg-card text-sm" />
                   </div>
                   <div>
                     <label className="text-sm font-semibold block mb-1">{t("contact_message")}</label>
-                    <textarea rows={5} required placeholder={t("contact_message_ph")} className="w-full px-3 py-2.5 rounded-lg border border-border/30 bg-card text-sm resize-none" />
+                    <textarea rows={5} name="message" required placeholder={t("contact_message_ph")} className="w-full px-3 py-2.5 rounded-lg border border-border/30 bg-card text-sm resize-none" />
                   </div>
-                  <button type="submit" className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-gradient-to-r from-primary to-accent font-semibold text-sm text-foreground shadow-card hover:shadow-hover hover:-translate-y-0.5 transition-all w-fit">
-                    {t("contact_send")}
+                  <button type="submit" disabled={sending} className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-gradient-to-r from-primary to-accent font-semibold text-sm text-foreground shadow-card hover:shadow-hover hover:-translate-y-0.5 transition-all w-fit disabled:opacity-50">
+                    {sending ? "..." : t("contact_send")}
                   </button>
                 </form>
               </motion.div>
