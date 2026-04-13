@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Menu, X, Search, ShoppingBag, User, LogOut } from "lucide-react";
+import { Menu, X, Search, User, LogOut } from "lucide-react";
+import { CartDrawer } from "@/components/CartDrawer";
 
 const Header = () => {
   const { t, toggleLang, lang } = useLanguage();
@@ -31,14 +32,12 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-background/90 border-b border-border/40">
       <div className="container flex items-center justify-between h-16">
-        {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <span className="font-display text-xl font-semibold tracking-tight text-foreground">
             Hussain.
           </span>
         </Link>
 
-        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
             <Link
@@ -53,7 +52,6 @@ const Header = () => {
           ))}
         </nav>
 
-        {/* Right side */}
         <div className="flex items-center gap-2">
           <button
             onClick={toggleLang}
@@ -65,9 +63,7 @@ const Header = () => {
             <button className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" aria-label="Search">
               <Search size={18} />
             </button>
-            <button className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" aria-label="Cart">
-              <ShoppingBag size={18} />
-            </button>
+            <CartDrawer />
             {user ? (
               <button
                 onClick={async () => {
@@ -89,6 +85,9 @@ const Header = () => {
               </Link>
             )}
           </div>
+          <div className="md:hidden">
+            <CartDrawer />
+          </div>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="md:hidden w-9 h-9 rounded-full flex items-center justify-center text-foreground"
@@ -99,7 +98,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile nav */}
       {menuOpen && (
         <nav className="md:hidden absolute top-full left-0 right-0 bg-background/98 backdrop-blur-xl border-b border-border/40 p-6 flex flex-col gap-1">
           {navLinks.map((link) => (
